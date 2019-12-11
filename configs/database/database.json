@@ -1,0 +1,6 @@
+{
+    "host" : "localhost:3306",
+    "username" : "root",
+    "password" : "Angka1234",
+    "scheme": "entry_task"
+}
