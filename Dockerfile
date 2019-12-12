@@ -22,4 +22,5 @@ CMD ["./main"]
 
 FROM mysql:5.7
 COPY --from=builder /go/src/github.com/nandawinata/entry-task/scripts ./scripts
+RUN chmod a+x /scripts/sql/init_table.sh
 RUN /scripts/sql/init_table.sh
