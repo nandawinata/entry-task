@@ -4,21 +4,24 @@ services:
     container_name: full_app
     build: .
     ports: 
-      - 8080:8080 
+      - 8080:8080
+    expose:
+      - 8080
     restart: on-failure
     volumes:
-      - api:/usr/src/app/
+      - api:/go/src/github.com/nandawinata/entry-task/
     depends_on:
       - fullstack-mysql          
     networks:
       - fullstack
 
-
   fullstack-mysql:
-    image: mysql:8.0
+    image: mysql:5.7
     container_name: full_db_mysql
-    ports: 
+    ports:
       - 3306:3306
+    expose:
+      - 3306
     environment: 
       - MYSQL_ROOT_HOST=${DB_HOST} 
       - MYSQL_USER=${DB_USER}
@@ -29,23 +32,6 @@ services:
       - database_mysql:/var/lib/mysql
     networks:
       - fullstack
-  
-  phpmyadmin:
-    image: phpmyadmin/phpmyadmin
-    container_name: phpmyadmin_container
-    depends_on:
-      - fullstack-mysql
-    environment:
-      - PMA_HOST=entry-task
-      - PMA_USER=${DB_USER}
-      - PMA_PORT=${DB_PORT}
-      - PMA_PASSWORD=${DB_PASSWORD}
-    ports:
-      - 9090:80
-    restart: always
-    networks:
-      - fullstack
-
 
 volumes:
   api:

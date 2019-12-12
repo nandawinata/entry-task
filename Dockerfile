@@ -1,16 +1,11 @@
-FROM golang:1.10 AS builder
+FROM golang:latest
+RUN go get -u github.com/golang/dep/cmd/dep \
+&& mkdir /go/src/github.com/nandawinata \
+&& git clone https://github.com/nandawinata/entry-task /go/src/github.com/nandawinata/entry-task
 
-# Download and install the latest release of dep
-ADD https://github.com/golang/dep/releases/download/v0.4.1/dep-linux-amd64 /usr/bin/dep
-RUN chmod +x /usr/bin/dep
+WORKDIR /go/src/github.com/nandawinata/entry-task/
 
-# Copy the code from the host and compile it
-WORKDIR $GOPATH/src/github.com/nandawinata/entry-task
-COPY Gopkg.toml Gopkg.lock ./
-RUN dep ensure --vendor-only
-COPY . ./
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix nocgo -o /app .
+RUN dep ensure -v
+RUN go build -o /go/src/github.com/nandawinata/entry-task/cmd/app
 
-FROM scratch
-COPY --from=builder /app ./
-ENTRYPOINT ["./app"]
+ENTRYPOINT ["/go/src/github.com/nandawinata/entry-task/"]
