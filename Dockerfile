@@ -19,7 +19,7 @@ RUN apk --no-cache add ca-certificates
 WORKDIR /root/
 
 COPY --from=builder /go/src/github.com/nandawinata/entry-task/main .
-COPY --from=builder /go/src/github.com/nandawinata/entry-task/configs .
+COPY --from=builder /go/src/github.com/nandawinata/entry-task/configs ./configs
 COPY --from=builder /go/src/github.com/nandawinata/entry-task/.env .       
 
 EXPOSE 8080

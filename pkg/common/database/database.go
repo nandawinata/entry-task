@@ -1,8 +1,6 @@
 package database
 
 import (
-	"fmt"
-
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/jmoiron/sqlx"
@@ -44,8 +42,9 @@ func init() {
 	// 	panic(err)
 	// }
 
-	DB, err := sqlx.Connect("mysql", fmt.Sprintf("%s:%s@(%s)/%s", "root", "Angka1234", "localhost:3306", "entry_task"))
-	DB.SetMaxIdleConns(8)
+	var err error
+
+	DB, err = sqlx.Connect("mysql", "root:Angka1234@tcp(localhost:3306)/entry_task?parseTime=true")
 
 	if err != nil {
 		panic(err)
