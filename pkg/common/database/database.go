@@ -44,7 +44,7 @@ func init() {
 
 	var err error
 
-	DB, err = sqlx.Connect("mysql", "root:Angka1234@tcp(localhost:3306)/entry_task?parseTime=true")
+	DB, err = sqlx.Connect("mysql", "root:Angka1234@tcp(full_db_mysql:3306)/entry_task?parseTime=true")
 
 	if err != nil {
 		panic(err)
