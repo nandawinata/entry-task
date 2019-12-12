@@ -1,5 +1,5 @@
 {
-    "host" : "localhost:3306",
+    "host" : "full_db_mysql:3306",
     "username" : "root",
     "password" : "Angka1234",
     "scheme": "entry_task"

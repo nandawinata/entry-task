@@ -1,6 +1,11 @@
 package database
 
 import (
+	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"os"
+
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/jmoiron/sqlx"
@@ -16,35 +21,36 @@ type DBSetting struct {
 var DB *sqlx.DB
 
 func init() {
-	// dir, err := os.Getwd()
+	dir, err := os.Getwd()
 
-	// if err != nil {
-	// 	panic(err)
-	// }
+	if err != nil {
+		panic(err)
+	}
 
-	// jsonFile, err := os.Open(dir + "/configs/database/database.json")
+	fmt.Printf("In DIRECTORY %s", dir)
+	fmt.Println()
 
-	// if err != nil {
-	// 	panic(err)
-	// }
+	jsonFile, err := os.Open(dir + "/configs/database/database.json")
 
-	// byteValue, err := ioutil.ReadAll(jsonFile)
+	if err != nil {
+		panic(err)
+	}
 
-	// if err != nil {
-	// 	panic(err)
-	// }
+	byteValue, err := ioutil.ReadAll(jsonFile)
 
-	// var setting DBSetting
+	if err != nil {
+		panic(err)
+	}
 
-	// err = json.Unmarshal(byteValue, &setting)
+	var setting DBSetting
 
-	// if err != nil {
-	// 	panic(err)
-	// }
+	err = json.Unmarshal(byteValue, &setting)
 
-	var err error
+	if err != nil {
+		panic(err)
+	}
 
-	DB, err = sqlx.Connect("mysql", "root:Angka1234@tcp(full_db_mysql:3306)/entry_task?parseTime=true")
+	DB, err = sqlx.Connect("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", setting.Username, setting.Password, setting.Host, setting.Scheme))
 
 	if err != nil {
 		panic(err)
