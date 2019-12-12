@@ -1,4 +1,8 @@
-FROM golang:latest
+FROM golang:alpine as builder
+
+RUN apk update && apk upgrade && \
+    apk add --no-cache bash git openssh
+
 RUN go get -u github.com/golang/dep/cmd/dep \
 && mkdir /go/src/github.com/nandawinata \
 && git clone https://github.com/nandawinata/entry-task /go/src/github.com/nandawinata/entry-task
@@ -6,6 +10,18 @@ RUN go get -u github.com/golang/dep/cmd/dep \
 WORKDIR /go/src/github.com/nandawinata/entry-task/
 
 RUN dep ensure -v
-RUN go build -o /go/src/github.com/nandawinata/entry-task/cmd/app
 
-ENTRYPOINT ["/go/src/github.com/nandawinata/entry-task/"]
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main github.com/nandawinata/entry-task/cmd/app
+
+FROM alpine:latest
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+COPY --from=builder /go/src/github.com/nandawinata/entry-task/main .
+COPY --from=builder /go/src/github.com/nandawinata/entry-task/configs .
+COPY --from=builder /go/src/github.com/nandawinata/entry-task/.env .       
+
+EXPOSE 8080
+
+CMD ["./main"]
