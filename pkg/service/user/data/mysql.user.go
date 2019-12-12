@@ -12,11 +12,11 @@ type MysqlUserData struct {
 }
 
 const (
-	GetUserById       = "SELECT id, username, nickname, password, photo FROM user where id = ?"
-	GetUserByUsername = "SELECT id, username, nickname, password, photo FROM user where username = ?"
-	InsertUser        = "INSERT INTO USER(username, nickname, password) VALUES(?,?,?)"
-	UpdateNickname    = "UPDATE user SET nickname = ? WHERE id = ?"
-	UpdatePhoto       = "UPDATE user SET photo = ? WHERE id = ?"
+	GetUserById       = "SELECT id, username, nickname, password, photo FROM users where id = ?"
+	GetUserByUsername = "SELECT id, username, nickname, password, photo FROM users where username = ?"
+	InsertUser        = "INSERT INTO users(username, nickname, password) VALUES(?,?,?)"
+	UpdateNickname    = "UPDATE users SET nickname = ? WHERE id = ?"
+	UpdatePhoto       = "UPDATE users SET photo = ? WHERE id = ?"
 )
 
 func (m MysqlUserData) GetUserById(id uint64) (*User, error) {

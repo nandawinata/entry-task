@@ -1,11 +1,11 @@
-create database entry_task;
+CREATE DATABASE entry_task;
 
-use entry_task;
+USE entry_task;
 
-create table user (
-	id int unsigned not null primary key auto_increment,
-	username varchar(255) unique not null,
-	nickname varchar(255) not null,
-	password varchar(255) not null,
-	photo varchar(255)
+CREATE TABLE IF NOT EXISTS users (
+	id INT UNSIGNED NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	username VARCHAR(255) UNIQUE NOT NULL,
+	nickname VARCHAR(255) NOT NULL,
+	password VARCHAR(255) NOT NULL,
+	photo VARCHAR(255)
 );
