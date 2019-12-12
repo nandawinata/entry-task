@@ -14,7 +14,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main github.com/n
 FROM mysql:5.7
 COPY --from=builder /go/src/github.com/nandawinata/entry-task/.env .
 COPY --from=builder /go/src/github.com/nandawinata/entry-task/scripts/sql/init_table.sql /docker-entrypoint-initdb.d/
-RUN /scripts/sql/init_table.sh
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
