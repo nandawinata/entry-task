@@ -12,10 +12,12 @@ RUN dep ensure -v
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main github.com/nandawinata/entry-task/cmd/app
 
 FROM mysql:5.7
-ENV MYSQL_ROOT_PASSWORD="Angka1234"
-ENV MYSQL_DATABASE="entry_task"
-WORKDIR /docker-entrypoint-initdb.d/
-COPY --from=builder /go/src/github.com/nandawinata/entry-task/scripts/sql/init_table.sql .
+WORKDIR /root/
+COPY --from=builder /go/src/github.com/nandawinata/entry-task/scripts/sql ./sql
+RUN chmod a+x sql/init_table.sh
+RUN ls -a
+RUN cat sql/init_table.sql
+RUN sql/init_table.sh
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
