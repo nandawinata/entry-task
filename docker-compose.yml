@@ -26,6 +26,7 @@ services:
       - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
     volumes:
       - database_mysql:/var/lib/mysql
+      - /go/src/github.com/nandawinata/entry-task/scripts/sql/init_table.sql:/docker-entrypoint-initdb.d/init_table.sql:ro
     networks:
       - fullstack
 
