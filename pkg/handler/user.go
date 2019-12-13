@@ -60,6 +60,56 @@ func Login(w http.ResponseWriter, r *http.Request, _ httprouter.Params) (interfa
 	return response, nil
 }
 
+func Profile(w http.ResponseWriter, r *http.Request, _ httprouter.Params, token *mw.TokenPayload) (interface{}, error) {
+	if token == nil {
+		return nil, eh.NewError(http.StatusUnauthorized, "Invalid token")
+	}
+
+	userService := user.New()
+
+	user, err := userService.GetUserById(token.ID)
+
+	if err != nil {
+		return nil, eh.DefaultError(err)
+	}
+
+	if user == nil {
+		return nil, eh.NewError(http.StatusBadRequest, "User not found")
+	}
+
+	userOutput := userService.UserToUserOutput(*user)
+
+	return userOutput, nil
+}
+
+func ProfileByUsername(w http.ResponseWriter, r *http.Request, p httprouter.Params, token *mw.TokenPayload) (interface{}, error) {
+	if token == nil {
+		return nil, eh.NewError(http.StatusUnauthorized, "Invalid token")
+	}
+
+	username := p.ByName("username")
+
+	if username == "" {
+		return nil, eh.NewError(http.StatusBadRequest, "Username required")
+	}
+
+	userService := user.New()
+
+	user, err := userService.GetUserByUsername(username)
+
+	if err != nil {
+		return nil, eh.DefaultError(err)
+	}
+
+	if user == nil {
+		return nil, eh.NewError(http.StatusBadRequest, "User not found")
+	}
+
+	userOutput := userService.UserToUserOutput(*user)
+
+	return userOutput, nil
+}
+
 func UpdateProfile(w http.ResponseWriter, r *http.Request, _ httprouter.Params, token *mw.TokenPayload) (interface{}, error) {
 	if token == nil {
 		return nil, eh.NewError(http.StatusUnauthorized, "Invalid token")

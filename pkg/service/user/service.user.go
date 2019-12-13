@@ -188,3 +188,14 @@ func (s UserService) Update(payload UpdatePayload) error {
 
 	return nil
 }
+
+func (s UserService) UserToUserOutput(payload data.User) data.UserOutput {
+	userOutput := data.UserOutput{
+		ID:       payload.ID,
+		Username: payload.Username,
+		Nickname: payload.Nickname,
+		Photo:    payload.Photo,
+	}
+
+	return userOutput
+}
