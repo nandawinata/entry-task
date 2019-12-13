@@ -18,6 +18,7 @@ RUN chmod a+x sql/init_table.sh
 RUN ls -a
 RUN cat sql/init_table.sql
 RUN sql/init_table.sh
+EXPOSE 3306
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
