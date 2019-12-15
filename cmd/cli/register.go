@@ -25,10 +25,8 @@ type UserPool struct {
 	UserBulk data.UserBulkPayload
 }
 
-var (
-	userPool map[int]UserPool
-	mapMutex = sync.RWMutex{}
-)
+var userPool map[int]UserPool
+var wg sync.WaitGroup
 
 func init() {
 	userPool = make(map[int]UserPool)
@@ -55,7 +53,9 @@ func main() {
 		poolID := counter % thread
 
 		go func(poolID int, randomString string) {
+			wg.Add(1)
 			poolInsertBulk(poolID, randomString)
+			wg.Wait()
 		}(poolID, scanner.Text())
 
 		counter++
@@ -98,7 +98,6 @@ func poolInsertBulk(poolID int, randomString string) {
 		}
 	}
 
-	mapMutex.Lock()
 	userPool[poolID] = pool
-	mapMutex.Unlock()
+	wg.Done()
 }
