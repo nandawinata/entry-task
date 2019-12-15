@@ -52,11 +52,12 @@ func main() {
 	for scanner.Scan() && counter < limit {
 		poolID := counter % thread
 
+		wg.Add(1)
 		go func(poolID int, randomString string) {
-			wg.Add(1)
+			defer wg.Done()
 			poolInsertBulk(poolID, randomString)
-			wg.Wait()
 		}(poolID, scanner.Text())
+		wg.Wait()
 
 		counter++
 	}
@@ -99,5 +100,4 @@ func poolInsertBulk(poolID int, randomString string) {
 	}
 
 	userPool[poolID] = pool
-	wg.Done()
 }
