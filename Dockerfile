@@ -10,6 +10,7 @@ RUN go get -u github.com/golang/dep/cmd/dep \
 WORKDIR /go/src/github.com/nandawinata/entry-task/
 RUN dep ensure -v
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main github.com/nandawinata/entry-task/cmd/app
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o register github.com/nandawinata/entry-task/cmd/cli
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates

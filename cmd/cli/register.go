@@ -13,7 +13,7 @@ const (
 	limit          = 5000000
 	limitExecute   = 1000
 	thread         = 10
-	dummyPath      = "/data/test.txt"
+	dummyPath      = "/assets/data/test.txt"
 	BaseInsert     = "INSERT INTO users(username, nickname, password) VALUES"
 	PreparedInsert = "(?,?,?)"
 	Delimiter      = ","
