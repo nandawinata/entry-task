@@ -77,10 +77,10 @@ func poolInsertBulk(poolID int, randomString, staticPass string) {
 	pool.UserBulk.Query = pool.UserBulk.Query + PreparedInsert
 	pool.UserBulk.Params = append(pool.UserBulk.Params, randomString, randomString, staticPass)
 	pool.Length++
+	userPool[poolID] = pool
 	fmt.Printf("Append data to POOL[%d] --> VALUES[%s]\n", poolID, randomString)
 
 	if pool.Length < limitExecute {
-		userPool[poolID] = pool
 		return
 	}
 
