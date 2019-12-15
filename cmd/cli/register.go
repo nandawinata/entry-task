@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/nandawinata/entry-task/pkg/service/user"
 	"github.com/nandawinata/entry-task/pkg/service/user/data"
@@ -24,7 +25,10 @@ type UserPool struct {
 	UserBulk data.UserBulkPayload
 }
 
-var userPool map[int]UserPool
+var (
+	userPool map[int]UserPool
+	mapMutex = sync.RWMutex{}
+)
 
 func init() {
 	userPool = make(map[int]UserPool)
@@ -47,15 +51,13 @@ func main() {
 	defer inFile.Close()
 
 	scanner := bufio.NewScanner(inFile)
-	for scanner.Scan() {
-		if counter >= 5000000 {
-			break
-		}
-
+	for scanner.Scan() && counter < limit {
 		poolID := counter % thread
 
 		go func(poolID int, randomString string) {
+			mapMutex.Lock()
 			poolInsertBulk(poolID, randomString)
+			mapMutex.Unlock()
 		}(poolID, scanner.Text())
 
 		counter++
@@ -63,7 +65,9 @@ func main() {
 }
 
 func poolInsertBulk(poolID int, randomString string) {
+	mapMutex.RLock()
 	pool, ok := userPool[poolID]
+	mapMutex.RUnlock()
 
 	if !ok {
 		pool = UserPool{
