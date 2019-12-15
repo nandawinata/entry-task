@@ -39,19 +39,23 @@ func main() {
 	limit, _ := strconv.Atoi(os.Args[1])
 	limitExecute, _ = strconv.Atoi(os.Args[2])
 	thread, _ = strconv.Atoi(os.Args[3])
+	staticPass := os.Args[4]
 
-	if limitExecute <= 0 || thread <= 0 {
+	if limit <= 0 || limitExecute <= 0 || thread <= 0 {
 		panic(fmt.Errorf("Arguments not valid"))
 	}
+
+	fmt.Printf("LIMIT[%d] | LIMIT EXECUTE [%d] | THREAD [%d]\n", limit, limitExecute, thread)
+	staticPass, _ = bcrypt.HashPassword(staticPass)
 
 	for counter < limit {
 		poolID := counter % thread
 
 		wg.Add(1)
-		go func(poolID int, randomString string) {
+		go func(poolID int, randomString, staticPass string) {
 			defer wg.Done()
-			poolInsertBulk(poolID, randomString)
-		}(poolID, strconv.Itoa(counter))
+			poolInsertBulk(poolID, randomString, staticPass)
+		}(poolID, strconv.Itoa(counter), staticPass)
 		wg.Wait()
 
 		counter++
@@ -60,7 +64,7 @@ func main() {
 	finalExecute()
 }
 
-func poolInsertBulk(poolID int, randomString string) {
+func poolInsertBulk(poolID int, randomString, staticPass string) {
 	pool, ok := userPool[poolID]
 
 	if !ok {
@@ -71,8 +75,7 @@ func poolInsertBulk(poolID int, randomString string) {
 		pool.UserBulk.Query = pool.UserBulk.Query + Delimiter
 	}
 	pool.UserBulk.Query = pool.UserBulk.Query + PreparedInsert
-	password, _ := bcrypt.HashPassword(randomString)
-	pool.UserBulk.Params = append(pool.UserBulk.Params, randomString, randomString, password)
+	pool.UserBulk.Params = append(pool.UserBulk.Params, randomString, randomString, staticPass)
 	pool.Length++
 	fmt.Printf("Append data to POOL[%d] --> VALUES[%s]\n", poolID, randomString)
 
