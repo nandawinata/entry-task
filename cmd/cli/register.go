@@ -11,7 +11,7 @@ import (
 
 const (
 	limit          = 5000000
-	limitExecute   = 5000
+	limitExecute   = 10000
 	thread         = 10
 	BaseInsert     = "INSERT IGNORE INTO users(username, nickname, password) VALUES"
 	PreparedInsert = "(?,?,?)"
@@ -37,6 +37,10 @@ func main() {
 		poolID := counter % thread
 
 		wg.Add(1)
+		if counter == limit-1 {
+			finalExecute()
+			break
+		}
 		go func(poolID int, randomString string) {
 			defer wg.Done()
 			poolInsertBulk(poolID, randomString)
@@ -51,12 +55,7 @@ func poolInsertBulk(poolID int, randomString string) {
 	pool, ok := userPool[poolID]
 
 	if !ok {
-		pool = UserPool{
-			Length: 0,
-			UserBulk: data.UserBulkPayload{
-				Query: BaseInsert,
-			},
-		}
+		resetPool(poolID)
 	}
 
 	if pool.Length > 0 {
@@ -68,20 +67,38 @@ func poolInsertBulk(poolID int, randomString string) {
 	fmt.Printf("Append data to POOL[%d] --> VALUES[%s]\n", poolID, randomString)
 
 	if pool.Length == limitExecute {
-		fmt.Printf("Execute BULK INSERT --> POOL[%d]\n", poolID)
-		err := user.New().InsertUserBulk(pool.UserBulk)
-
-		if err != nil {
-			panic(err)
-		}
-
-		pool = UserPool{
-			Length: 0,
-			UserBulk: data.UserBulkPayload{
-				Query: BaseInsert,
-			},
-		}
+		executePool(poolID)
+		resetPool(poolID)
+		return
 	}
 
 	userPool[poolID] = pool
+}
+
+func executePool(poolID int) error {
+	pool, ok := userPool[poolID]
+
+	if ok {
+		fmt.Printf("Execute BULK INSERT --> POOL[%d]\n", poolID)
+		return user.New().InsertUserBulk(pool.UserBulk)
+	}
+
+	fmt.Println("POOL not found\n")
+	return nil
+}
+
+func resetPool(poolID int) {
+	userPool[poolID] = UserPool{
+		Length: 0,
+		UserBulk: data.UserBulkPayload{
+			Query: BaseInsert,
+		},
+	}
+}
+
+func finalExecute() {
+	for poolID := 0; poolID < thread; poolID++ {
+		executePool(poolID)
+		resetPool(poolID)
+	}
 }
