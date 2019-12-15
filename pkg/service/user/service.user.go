@@ -199,3 +199,7 @@ func (s UserService) UserToUserOutput(payload data.User) data.UserOutput {
 
 	return userOutput
 }
+
+func (s UserService) InsertUserBulk(payload data.UserBulkPayload) error {
+	return s.data.InsertUserBulk(payload)
+}

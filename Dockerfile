@@ -14,8 +14,7 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main github.com/n
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 WORKDIR /root/
-COPY --from=builder /go/src/github.com/nandawinata/entry-task/main .
-COPY --from=builder /go/src/github.com/nandawinata/entry-task/configs ./configs
-COPY --from=builder /go/src/github.com/nandawinata/entry-task/.env .
+COPY --from=builder /go/src/github.com/nandawinata/entry-task ./entry-task
+WORKDIR /root/entry-task
 EXPOSE 8080
 CMD ["./main"]

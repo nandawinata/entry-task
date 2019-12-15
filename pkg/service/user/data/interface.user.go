@@ -15,10 +15,16 @@ type UserOutput struct {
 	Photo    *string `json:"photo" db:"photo"`
 }
 
+type UserBulkPayload struct {
+	Query  string
+	Params []interface{}
+}
+
 type UserData interface {
 	GetUserById(id uint64) (*User, error)
 	GetUserByUsername(username string) (*User, error)
 	InsertUser(user User) (*User, error)
+	InsertUserBulk(payload UserBulkPayload) error
 	UpdateNickname(user User) error
 	UpdatePhoto(user User) error
 }

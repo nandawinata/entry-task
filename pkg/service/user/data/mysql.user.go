@@ -90,6 +90,23 @@ func (m MysqlUserData) InsertUser(user User) (*User, error) {
 	return &user, nil
 }
 
+func (m MysqlUserData) InsertUserBulk(payload UserBulkPayload) error {
+	stmt, err := database.GetDB().Preparex(payload.Query)
+
+	if err != nil {
+		return eh.DefaultError(err)
+	}
+
+	_, err = stmt.Exec(payload.Params...)
+	defer stmt.Close()
+
+	if err != nil {
+		return eh.DefaultError(err)
+	}
+
+	return nil
+}
+
 func (m MysqlUserData) UpdateNickname(user User) error {
 	stmt, err := database.GetDB().Preparex(UpdateNickname)
 
