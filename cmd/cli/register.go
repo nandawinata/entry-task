@@ -55,7 +55,7 @@ func poolInsertBulk(poolID int, randomString string) {
 	pool, ok := userPool[poolID]
 
 	if !ok {
-		resetPool(poolID)
+		pool = resetPool(poolID)
 	}
 
 	if pool.Length > 0 {
@@ -66,16 +66,16 @@ func poolInsertBulk(poolID int, randomString string) {
 	pool.Length++
 	fmt.Printf("Append data to POOL[%d] --> VALUES[%s]\n", poolID, randomString)
 
-	if pool.Length == limitExecute {
-		err := executePool(poolID)
-		if err != nil {
-			panic(err)
-		}
-		resetPool(poolID)
+	if pool.Length < limitExecute {
+		userPool[poolID] = pool
 		return
 	}
 
-	userPool[poolID] = pool
+	err := executePool(poolID)
+	if err != nil {
+		panic(err)
+	}
+	resetPool(poolID)
 }
 
 func executePool(poolID int) error {
@@ -90,13 +90,15 @@ func executePool(poolID int) error {
 	return nil
 }
 
-func resetPool(poolID int) {
+func resetPool(poolID int) UserPool {
 	userPool[poolID] = UserPool{
 		Length: 0,
 		UserBulk: data.UserBulkPayload{
 			Query: BaseInsert,
 		},
 	}
+
+	return userPool[poolID]
 }
 
 func finalExecute() {
