@@ -1,9 +1,8 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
-	"os"
+	"strconv"
 	"sync"
 
 	"github.com/nandawinata/entry-task/pkg/service/user"
@@ -12,7 +11,7 @@ import (
 
 const (
 	limit          = 5000000
-	limitExecute   = 1000
+	limitExecute   = 5000
 	thread         = 10
 	dummyPath      = "/assets/data/test.txt"
 	BaseInsert     = "INSERT IGNORE INTO users(username, nickname, password) VALUES"
@@ -35,28 +34,14 @@ func init() {
 func main() {
 	counter := 0
 
-	dir, err := os.Getwd()
-
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("LOAD FROM [%s]\n", dir+dummyPath)
-	inFile, err := os.Open(dir + dummyPath)
-	if err != nil {
-		panic(err)
-	}
-	defer inFile.Close()
-
-	scanner := bufio.NewScanner(inFile)
-	for scanner.Scan() && counter < limit {
+	for counter < limit {
 		poolID := counter % thread
 
 		wg.Add(1)
 		go func(poolID int, randomString string) {
 			defer wg.Done()
 			poolInsertBulk(poolID, randomString)
-		}(poolID, scanner.Text())
+		}(poolID, strconv.Itoa(counter))
 		wg.Wait()
 
 		counter++
