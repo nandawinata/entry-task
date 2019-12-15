@@ -13,7 +13,6 @@ const (
 	limit          = 5000000
 	limitExecute   = 5000
 	thread         = 10
-	dummyPath      = "/assets/data/test.txt"
 	BaseInsert     = "INSERT IGNORE INTO users(username, nickname, password) VALUES"
 	PreparedInsert = "(?,?,?)"
 	Delimiter      = ","
