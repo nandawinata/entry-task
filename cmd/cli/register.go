@@ -67,7 +67,10 @@ func poolInsertBulk(poolID int, randomString string) {
 	fmt.Printf("Append data to POOL[%d] --> VALUES[%s]\n", poolID, randomString)
 
 	if pool.Length == limitExecute {
-		executePool(poolID)
+		err := executePool(poolID)
+		if err != nil {
+			panic(err)
+		}
 		resetPool(poolID)
 		return
 	}
