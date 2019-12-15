@@ -2,20 +2,13 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"sync"
 
+	"github.com/nandawinata/entry-task/pkg/helper/bcrypt"
 	"github.com/nandawinata/entry-task/pkg/service/user"
 	"github.com/nandawinata/entry-task/pkg/service/user/data"
-)
-
-const (
-	limit          = 5000000
-	limitExecute   = 10000
-	thread         = 10
-	BaseInsert     = "INSERT IGNORE INTO users(username, nickname, password) VALUES"
-	PreparedInsert = "(?,?,?)"
-	Delimiter      = ","
 )
 
 type UserPool struct {
@@ -23,8 +16,18 @@ type UserPool struct {
 	UserBulk data.UserBulkPayload
 }
 
-var userPool map[int]UserPool
-var wg sync.WaitGroup
+const (
+	BaseInsert     = "INSERT IGNORE INTO users(username, nickname, password) VALUES"
+	PreparedInsert = "(?,?,?)"
+	Delimiter      = ","
+)
+
+var (
+	userPool     map[int]UserPool
+	limitExecute int
+	thread       int
+	wg           sync.WaitGroup
+)
 
 func init() {
 	userPool = make(map[int]UserPool)
@@ -33,14 +36,18 @@ func init() {
 func main() {
 	counter := 0
 
+	limit, _ := strconv.Atoi(os.Args[1])
+	limitExecute, _ = strconv.Atoi(os.Args[2])
+	thread, _ = strconv.Atoi(os.Args[3])
+
+	if limitExecute <= 0 || thread <= 0 {
+		panic(fmt.Errorf("Arguments not valid"))
+	}
+
 	for counter < limit {
 		poolID := counter % thread
 
 		wg.Add(1)
-		if counter == limit-1 {
-			finalExecute()
-			break
-		}
 		go func(poolID int, randomString string) {
 			defer wg.Done()
 			poolInsertBulk(poolID, randomString)
@@ -49,6 +56,8 @@ func main() {
 
 		counter++
 	}
+
+	finalExecute()
 }
 
 func poolInsertBulk(poolID int, randomString string) {
@@ -62,7 +71,8 @@ func poolInsertBulk(poolID int, randomString string) {
 		pool.UserBulk.Query = pool.UserBulk.Query + Delimiter
 	}
 	pool.UserBulk.Query = pool.UserBulk.Query + PreparedInsert
-	pool.UserBulk.Params = append(pool.UserBulk.Params, randomString, randomString, randomString)
+	password, _ := bcrypt.HashPassword(randomString)
+	pool.UserBulk.Params = append(pool.UserBulk.Params, randomString, randomString, password)
 	pool.Length++
 	fmt.Printf("Append data to POOL[%d] --> VALUES[%s]\n", poolID, randomString)
 
