@@ -55,9 +55,7 @@ func main() {
 		poolID := counter % thread
 
 		go func(poolID int, randomString string) {
-			mapMutex.Lock()
 			poolInsertBulk(poolID, randomString)
-			mapMutex.Unlock()
 		}(poolID, scanner.Text())
 
 		counter++
@@ -65,9 +63,7 @@ func main() {
 }
 
 func poolInsertBulk(poolID int, randomString string) {
-	mapMutex.RLock()
 	pool, ok := userPool[poolID]
-	mapMutex.RUnlock()
 
 	if !ok {
 		pool = UserPool{
@@ -102,5 +98,7 @@ func poolInsertBulk(poolID int, randomString string) {
 		}
 	}
 
+	mapMutex.Lock()
 	userPool[poolID] = pool
+	mapMutex.Unlock()
 }
