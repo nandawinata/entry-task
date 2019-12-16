@@ -21,7 +21,16 @@ type DBSetting struct {
 var DB *sqlx.DB
 
 func init() {
-	jsonFile, err := os.Open("../../../configs/database/database.json")
+	dir, err := os.Getwd()
+
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Printf("In DIRECTORY %s", dir)
+	fmt.Println()
+
+	jsonFile, err := os.Open(dir + "/configs/database/database.json")
 
 	if err != nil {
 		panic(err)
