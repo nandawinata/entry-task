@@ -1,0 +1,1 @@
+./wrk -t12 -c400 -d30s -H"Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJhIiwiZXhwIjoxNTc2NTUyMDg3LCJpc3MiOiJlbnRyeS10YXNrIn0.ohceBgZNaQxW1ZT1nbdPIrJAb8qr-o4S8fc2ak_5rqw" http://localhost:8080/profile
