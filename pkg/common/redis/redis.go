@@ -25,16 +25,7 @@ type Redis struct {
 }
 
 func init() {
-	dir, err := os.Getwd()
-
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Printf("In DIRECTORY %s", dir)
-	fmt.Println()
-
-	jsonFile, err := os.Open(dir + "/configs/redis/redis.json")
+	jsonFile, err := os.Open("../../../configs/redis/redis.json")
 
 	if err != nil {
 		panic(err)
