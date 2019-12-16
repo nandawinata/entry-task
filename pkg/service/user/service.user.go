@@ -138,6 +138,8 @@ func (s UserService) GetUserByUsername(username string) (*data.User, error) {
 	}
 
 	if user != nil {
+		fmt.Println("USE REDIS")
+		fmt.Println(user)
 		return user, nil
 	}
 
@@ -177,6 +179,8 @@ func (s UserService) GetUserById(id uint64) (*data.User, error) {
 	}
 
 	if user != nil {
+		fmt.Println("USE REDIS")
+		fmt.Println(user)
 		return user, nil
 	}
 
