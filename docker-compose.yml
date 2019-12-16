@@ -9,7 +9,8 @@ services:
     volumes:
       - api:/go/src/github.com/nandawinata/entry-task/
     depends_on:
-      - fullstack-mysql          
+      - fullstack-mysql
+      - fullstack-redis       
     networks:
       - fullstack
 
@@ -31,10 +32,21 @@ services:
     networks:
       - fullstack
 
+  fullstack-redis:
+    image: redis
+    container_name: full_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ../data/redis:/data
+    entrypoint: redis-server --appendonly yes
+    restart: always
+    networks:
+      - fullstack
+
 volumes:
   api:
   database_mysql:
-  sql_script:
 
 networks:
   fullstack:

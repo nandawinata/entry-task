@@ -1,12 +1,15 @@
 package user
 
 import (
+	"fmt"
 	"net/http"
 
+	"github.com/nandawinata/entry-task/pkg/common/redis"
 	"github.com/nandawinata/entry-task/pkg/helper/bcrypt"
 	eh "github.com/nandawinata/entry-task/pkg/helper/error_handler"
 	"github.com/nandawinata/entry-task/pkg/helper/middleware"
 	"github.com/nandawinata/entry-task/pkg/helper/upload_file"
+	"github.com/nandawinata/entry-task/pkg/service/user/constants"
 	"github.com/nandawinata/entry-task/pkg/service/user/data"
 )
 
@@ -124,20 +127,78 @@ func (s UserService) Login(payload LoginPayload) (*LoginResponse, error) {
 }
 
 func (s UserService) GetUserByUsername(username string) (*data.User, error) {
-	user, err := s.data.GetUserByUsername(username)
+	var user *data.User
+
+	redisService := redis.New()
+	keyUsername := fmt.Sprintf(constants.KEY_USERNAME, username)
+	err := redisService.Get(keyUsername, &user)
 
 	if err != nil {
 		return nil, eh.DefaultError(err)
+	}
+
+	if user != nil {
+		return user, nil
+	}
+
+	user, err = s.data.GetUserByUsername(username)
+
+	if err != nil {
+		return nil, eh.DefaultError(err)
+	}
+
+	err = redisService.Set(keyUsername, user, constants.REDIS_EXPIRE)
+
+	if err != nil {
+		return nil, eh.DefaultError(err)
+	}
+
+	if user != nil {
+		keyID := fmt.Sprintf(constants.KEY_USER_ID, int(user.ID))
+		err = redisService.Set(keyID, user, constants.REDIS_EXPIRE)
+
+		if err != nil {
+			return nil, eh.DefaultError(err)
+		}
 	}
 
 	return user, nil
 }
 
 func (s UserService) GetUserById(id uint64) (*data.User, error) {
-	user, err := s.data.GetUserById(id)
+	var user *data.User
+
+	redisService := redis.New()
+	keyID := fmt.Sprintf(constants.KEY_USER_ID, int(id))
+	err := redisService.Get(keyID, &user)
 
 	if err != nil {
 		return nil, eh.DefaultError(err)
+	}
+
+	if user != nil {
+		return user, nil
+	}
+
+	user, err = s.data.GetUserById(id)
+
+	if err != nil {
+		return nil, eh.DefaultError(err)
+	}
+
+	err = redisService.Set(keyID, user, constants.REDIS_EXPIRE)
+
+	if err != nil {
+		return nil, eh.DefaultError(err)
+	}
+
+	if user != nil {
+		keyUsername := fmt.Sprintf(constants.KEY_USERNAME, user.Username)
+		err = redisService.Set(keyUsername, user, constants.REDIS_EXPIRE)
+
+		if err != nil {
+			return nil, eh.DefaultError(err)
+		}
 	}
 
 	return user, nil

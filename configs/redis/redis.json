@@ -1,0 +1,5 @@
+{
+    "host" : "full_redis:6379",
+    "password" : "",
+    "db": 0
+}
