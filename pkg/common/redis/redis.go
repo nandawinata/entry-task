@@ -31,10 +31,10 @@ func init() {
 		panic(err)
 	}
 
-	fmt.Printf("In DIRECTORY %s", dir)
-	fmt.Println()
+	fmt.Printf("In DIRECTORY %s\n", dir)
 
 	jsonFile, err := os.Open(dir + "/configs/redis/redis.json")
+	// jsonFile, err := os.Open("/Users/nandaadhiwinata/go/src/github.com/nandawinata/entry-task/configs/redis/redis.json")
 	if err != nil {
 		panic(err)
 	}
@@ -54,7 +54,8 @@ func init() {
 	}
 
 	client = redis.NewClient(&redis.Options{
-		Addr:     setting.Host,
+		Addr: setting.Host,
+		// Addr:     "127.0.0.1:6379",
 		Password: setting.Password,
 		DB:       setting.DB,
 	})
