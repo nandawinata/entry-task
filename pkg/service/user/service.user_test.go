@@ -170,55 +170,47 @@ func TestLogin(t *testing.T) {
 	// End User not found
 
 	// Error Get Username
-	testObjThree := new(MyMockedObject)
-	userService = UserService{testObjThree}
-
 	loginPayload = LoginPayload{
 		Username: anyError,
 		Password: failPass,
 	}
 
-	testObjThree.On("GetUserByUsername", anyError).Return(nil, mock.AnythingOfType("error"))
+	testObj.On("GetUserByUsername", anyError).Return(nil, mock.AnythingOfType("error"))
 	_, err = userService.Login(loginPayload)
 
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	testObjThree.AssertExpectations(t)
+	testObj.AssertExpectations(t)
 	// End Error Get Username
 
 	// IncorrectPassword
-	testObjTwo := new(MyMockedObject)
-	userService = UserService{testObjTwo}
-
 	loginPayload = LoginPayload{
 		Username: successGetUsername,
 		Password: failPass,
 	}
 
-	testObjTwo.On("GetUserByUsername", successGetUsername).Return(mockUser, nil)
+	testObj.On("GetUserByUsername", successGetUsername).Return(mockUser, nil)
 	_, err = userService.Login(loginPayload)
 
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	testObjTwo.AssertExpectations(t)
+	testObj.AssertExpectations(t)
 	// End IncorrectPassword
 
 	// Success
-	testObjOne := new(MyMockedObject)
-	userService = UserService{testObjOne}
 	loginPayload = LoginPayload{
 		Username: successGetUsername,
 		Password: correctPass,
 	}
-	testObjOne.On("GetUserByUsername", successGetUsername).Return(mockUser, nil)
+	testObj.On("GetUserByUsername", successGetUsername).Return(mockUser, nil)
 	_, err = userService.Login(loginPayload)
 
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	testObjOne.AssertExpectations(t)
+	testObj.AssertExpectations(t)
 	// End Success
 }
 
@@ -241,51 +233,42 @@ func TestUpdate(t *testing.T) {
 	// End User not found
 
 	// Error GetUserByID
-	testObjOne := new(MyMockedObject)
-	userService = UserService{testObjOne}
-
 	updatePayload = UpdatePayload{
 		ID: errorID,
 	}
 
-	testObjOne.On("GetUserById", errorID).Return(nil, nil)
+	testObj.On("GetUserById", errorID).Return(nil, nil)
 	err = userService.Update(updatePayload)
 
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	testObjOne.AssertExpectations(t)
+	testObj.AssertExpectations(t)
 	// End Error GetUserByID
 
 	// Update photo success
-	testObjFour := new(MyMockedObject)
-	userService = UserService{testObjFour}
-
 	nickname := updateNicknameSuccess
 	updatePayload = UpdatePayload{
 		ID:    successID,
 		Photo: &nickname,
 	}
 
-	testObjFour.On("GetUserById", successID).Return(mockUser, nil)
+	testObj.On("GetUserById", successID).Return(mockUser, nil)
 
 	updatePhotoPayload := data.User{
 		ID:    successID,
 		Photo: &nickname,
 	}
-	testObjFour.On("UpdatePhoto", updatePhotoPayload).Return(nil)
+	testObj.On("UpdatePhoto", updatePhotoPayload).Return(nil)
 	err = userService.Update(updatePayload)
 
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	testObjFour.AssertExpectations(t)
+	testObj.AssertExpectations(t)
 	// End Update photo success
 
 	// Update photo success
-	testObjFive := new(MyMockedObject)
-	userService = UserService{testObjFive}
-
 	updatePayload = UpdatePayload{
 		ID:       successID,
 		Nickname: &nickname,
@@ -295,13 +278,13 @@ func TestUpdate(t *testing.T) {
 		ID:       successID,
 		Nickname: nickname,
 	}
-	testObjFive.On("UpdateNickname", updateNicknamePayload).Return(nil)
+	testObj.On("UpdateNickname", updateNicknamePayload).Return(nil)
 	err = userService.Update(updatePayload)
 
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	testObjFive.AssertExpectations(t)
+	testObj.AssertExpectations(t)
 	// End Update photo success
 }
 
