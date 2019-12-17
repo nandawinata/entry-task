@@ -11,14 +11,16 @@ import (
 )
 
 const (
-	successID          = uint64(0)
-	failID             = uint64(1)
-	errorID            = uint64(2)
-	successGetUsername = "Object1"
-	failGetUsername    = "Object2"
-	anyError           = "ObjAnyError"
-	correctPass        = "correctPass"
-	failPass           = "failPass"
+	successID             = uint64(0)
+	failID                = uint64(1)
+	errorID               = uint64(2)
+	successGetUsername    = "Object1"
+	failGetUsername       = "Object2"
+	anyError              = "ObjAnyError"
+	correctPass           = "correctPass"
+	failPass              = "failPass"
+	updateNicknameSuccess = "anyNickname"
+	updateNicknameFailed  = "anyNicknameOne"
 )
 
 type MyMockedObject struct {
@@ -86,8 +88,8 @@ func (m *MyMockedObject) InsertUserBulk(payload data.UserBulkPayload) error {
 
 func (m *MyMockedObject) UpdateNickname(user data.User) error {
 	m.Called(user)
-	switch user.Nickname {
-	case successGetUsername:
+
+	if user.Nickname == updateNicknameSuccess {
 		return nil
 	}
 
@@ -96,8 +98,9 @@ func (m *MyMockedObject) UpdateNickname(user data.User) error {
 
 func (m *MyMockedObject) UpdatePhoto(user data.User) error {
 	m.Called(user)
-	switch user.Username {
-	case successGetUsername:
+
+	if *user.Photo == updateNicknameSuccess {
+		fmt.Println("KAKAKK")
 		return nil
 	}
 
@@ -250,20 +253,28 @@ func TestUpdate(t *testing.T) {
 	testObjOne.AssertExpectations(t)
 	// End Error GetUserByID
 
-	// User exists empty update
-	testObjTwo := new(MyMockedObject)
-	userService = UserService{testObjTwo}
+	// Update nickname success
+	testObjThree := new(MyMockedObject)
+	userService = UserService{testObjThree}
 
+	nickname := updateNicknameSuccess
 	updatePayload = UpdatePayload{
-		ID: successID,
+		ID:       successID,
+		Nickname: &nickname,
 	}
 
-	testObjTwo.On("GetUserById", successID).Return(mockUser, nil)
+	testObjThree.On("GetUserById", successID).Return(mockUser, nil)
+
+	updateNicknamePayload := data.User{
+		ID:       successID,
+		Nickname: nickname,
+	}
+	testObjThree.On("UpdateNickname", updateNicknamePayload).Return(nil)
 	err = userService.Update(updatePayload)
 
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	testObjTwo.AssertExpectations(t)
-	// End User exists empty update
+	testObjThree.AssertExpectations(t)
+	// End Update nickname success
 }
