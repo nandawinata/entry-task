@@ -51,7 +51,7 @@ func init() {
 		panic(err)
 	}
 
-	// settings.Host = "127.0.0.1:3306"
+	// setting.Host = "127.0.0.1:3306"
 	DB, err = sqlx.Connect("mysql", fmt.Sprintf("%s:%s@tcp(%s)/%s?parseTime=true", setting.Username, setting.Password, setting.Host, setting.Scheme))
 
 	if err != nil {
