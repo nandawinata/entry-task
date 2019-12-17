@@ -82,8 +82,13 @@ func (m *MyMockedObject) InsertUser(user data.User) (*data.User, error) {
 }
 
 func (m *MyMockedObject) InsertUserBulk(payload data.UserBulkPayload) error {
-	args := m.Called(payload)
-	return args.Error(1)
+	m.Called(payload)
+
+	if payload.Query == "" {
+		return errors.New("Any Error")
+	}
+
+	return nil
 }
 
 func (m *MyMockedObject) UpdateNickname(user data.User) error {
@@ -100,7 +105,6 @@ func (m *MyMockedObject) UpdatePhoto(user data.User) error {
 	m.Called(user)
 
 	if *user.Photo == updateNicknameSuccess {
-		fmt.Println("KAKAKK")
 		return nil
 	}
 
@@ -277,4 +281,60 @@ func TestUpdate(t *testing.T) {
 	}
 	testObjFour.AssertExpectations(t)
 	// End Update photo success
+
+	// Update photo success
+	testObjFive := new(MyMockedObject)
+	userService = UserService{testObjFive}
+
+	updatePayload = UpdatePayload{
+		ID:       successID,
+		Nickname: &nickname,
+	}
+
+	updateNicknamePayload := data.User{
+		ID:       successID,
+		Nickname: nickname,
+	}
+	testObjFive.On("UpdateNickname", updateNicknamePayload).Return(nil)
+	err = userService.Update(updatePayload)
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	testObjFive.AssertExpectations(t)
+	// End Update photo success
+}
+
+func TestInsertBulk(t *testing.T) {
+	// Success
+	testObj := new(MyMockedObject)
+	userService := UserService{testObj}
+
+	payload := data.UserBulkPayload{
+		Query: "Any",
+	}
+
+	testObj.On("InsertUserBulk", payload).Return(nil)
+	err := userService.InsertUserBulk(payload)
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	testObj.AssertExpectations(t)
+	// End Success
+
+	// Success
+	testObjOne := new(MyMockedObject)
+	userService = UserService{testObjOne}
+
+	payload = data.UserBulkPayload{}
+
+	testObjOne.On("InsertUserBulk", payload).Return(mock.AnythingOfType("error"))
+	err = userService.InsertUserBulk(payload)
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	testObjOne.AssertExpectations(t)
+	// End Success
 }
