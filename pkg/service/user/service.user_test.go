@@ -253,28 +253,28 @@ func TestUpdate(t *testing.T) {
 	testObjOne.AssertExpectations(t)
 	// End Error GetUserByID
 
-	// Update nickname success
-	testObjThree := new(MyMockedObject)
-	userService = UserService{testObjThree}
+	// Update photo success
+	testObjFour := new(MyMockedObject)
+	userService = UserService{testObjFour}
 
 	nickname := updateNicknameSuccess
 	updatePayload = UpdatePayload{
-		ID:       successID,
-		Nickname: &nickname,
+		ID:    successID,
+		Photo: &nickname,
 	}
 
-	testObjThree.On("GetUserById", successID).Return(mockUser, nil)
+	testObjFour.On("GetUserById", successID).Return(mockUser, nil)
 
-	updateNicknamePayload := data.User{
-		ID:       successID,
-		Nickname: nickname,
+	updatePhotoPayload := data.User{
+		ID:    successID,
+		Photo: &nickname,
 	}
-	testObjThree.On("UpdateNickname", updateNicknamePayload).Return(nil)
+	testObjFour.On("UpdatePhoto", updatePhotoPayload).Return(nil)
 	err = userService.Update(updatePayload)
 
 	if err != nil {
 		fmt.Println(err.Error())
 	}
-	testObjThree.AssertExpectations(t)
-	// End Update nickname success
+	testObjFour.AssertExpectations(t)
+	// End Update photo success
 }
