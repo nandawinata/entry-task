@@ -268,7 +268,7 @@ func TestUpdate(t *testing.T) {
 	testObj.AssertExpectations(t)
 	// End Update photo success
 
-	// Update photo success
+	// Update nickname success
 	updatePayload = UpdatePayload{
 		ID:       successID,
 		Nickname: &nickname,
@@ -285,7 +285,7 @@ func TestUpdate(t *testing.T) {
 		fmt.Println(err.Error())
 	}
 	testObj.AssertExpectations(t)
-	// End Update photo success
+	// End Update nickname success
 }
 
 func TestInsertBulk(t *testing.T) {
@@ -306,7 +306,7 @@ func TestInsertBulk(t *testing.T) {
 	testObj.AssertExpectations(t)
 	// End Success
 
-	// Success
+	// Error
 	testObjOne := new(MyMockedObject)
 	userService = UserService{testObjOne}
 
@@ -319,5 +319,5 @@ func TestInsertBulk(t *testing.T) {
 		fmt.Println(err.Error())
 	}
 	testObjOne.AssertExpectations(t)
-	// End Success
+	// End Error
 }
