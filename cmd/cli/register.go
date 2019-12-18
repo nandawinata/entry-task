@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"sync"
+	"time"
 
 	"github.com/nandawinata/entry-task/pkg/helper/bcrypt"
 	"github.com/nandawinata/entry-task/pkg/service/user"
@@ -23,14 +23,14 @@ const (
 )
 
 var (
+	query        string
 	userPool     map[int]UserPool
 	limitExecute int
-	thread       int
-	wg           sync.WaitGroup
+	pools        int
 )
 
 func init() {
-	userPool = make(map[int]UserPool)
+	initPool()
 }
 
 func main() {
@@ -38,47 +38,49 @@ func main() {
 
 	limit, _ := strconv.Atoi(os.Args[1])
 	limitExecute, _ = strconv.Atoi(os.Args[2])
-	thread, _ = strconv.Atoi(os.Args[3])
+	pools, _ = strconv.Atoi(os.Args[3])
 	staticPass := os.Args[4]
 
-	if limit <= 0 || limitExecute <= 0 || thread <= 0 {
+	if limit <= 0 || limitExecute <= 0 || pools <= 0 {
 		panic(fmt.Errorf("Arguments not valid"))
 	}
 
-	fmt.Printf("LIMIT[%d] | LIMIT EXECUTE [%d] | THREAD [%d]\n", limit, limitExecute, thread)
+	fmt.Printf("LIMIT[%d] | LIMIT EXECUTE [%d] | POOL [%d]\n", limit, limitExecute, pools)
 	staticPass, _ = bcrypt.HashPassword(staticPass)
 
+	start := time.Now()
+	fmt.Printf("Start at: %s\n", start.String())
+
+	createQuery()
 	for counter < limit {
-		poolID := counter % thread
-
-		wg.Add(1)
-		go func(poolID int, randomString, staticPass string) {
-			defer wg.Done()
-			poolInsertBulk(poolID, randomString, staticPass)
-		}(poolID, strconv.Itoa(counter), staticPass)
-		wg.Wait()
-
+		poolID := counter % pools
+		poolInsertBulk(poolID, strconv.Itoa(counter), staticPass)
 		counter++
 	}
-
 	finalExecute()
+
+	finish := time.Now()
+	elapsed := finish.Sub(start).Seconds()
+
+	fmt.Printf("Finish at: %s\n", finish.String())
+	fmt.Printf("Elapsed Time: [%f seconds]\n", elapsed)
+}
+
+func createQuery() string {
+	query = BaseInsert + PreparedInsert
+
+	for i := 1; i < limitExecute; i++ {
+		query = query + Delimiter + PreparedInsert
+	}
+
+	return query
 }
 
 func poolInsertBulk(poolID int, randomString, staticPass string) {
-	pool, ok := userPool[poolID]
-
-	if !ok {
-		pool = resetPool(poolID)
-	}
-
-	if pool.Length > 0 {
-		pool.UserBulk.Query = pool.UserBulk.Query + Delimiter
-	}
-	pool.UserBulk.Query = pool.UserBulk.Query + PreparedInsert
+	pool, _ := userPool[poolID]
 	pool.UserBulk.Params = append(pool.UserBulk.Params, randomString, randomString, staticPass)
 	pool.Length++
 	userPool[poolID] = pool
-	fmt.Printf("Append data to POOL[%d] --> VALUES[%s]\n", poolID, randomString)
 
 	if pool.Length < limitExecute {
 		return
@@ -94,29 +96,33 @@ func poolInsertBulk(poolID int, randomString, staticPass string) {
 func executePool(poolID int) error {
 	pool, ok := userPool[poolID]
 
-	if ok {
-		fmt.Printf("Execute BULK INSERT --> POOL[%d]\n", poolID)
+	pool.UserBulk.Query = query
+	if ok && pool.Length > 0 {
 		return user.New().InsertUserBulk(pool.UserBulk)
 	}
 
-	fmt.Println("POOL not found\n")
 	return nil
 }
 
-func resetPool(poolID int) UserPool {
+func initPool() {
+	userPool = make(map[int]UserPool)
+
+	for poolID := 0; poolID < pools; poolID++ {
+		resetPool(poolID)
+	}
+}
+
+func resetPool(poolID int) {
 	userPool[poolID] = UserPool{
 		Length: 0,
 		UserBulk: data.UserBulkPayload{
 			Query: BaseInsert,
 		},
 	}
-
-	return userPool[poolID]
 }
 
 func finalExecute() {
-	for poolID := 0; poolID < thread; poolID++ {
+	for poolID := 0; poolID < pools; poolID++ {
 		executePool(poolID)
-		resetPool(poolID)
 	}
 }
