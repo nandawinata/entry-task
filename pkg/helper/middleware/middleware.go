@@ -7,7 +7,6 @@ import (
 	"time"
 
 	jwt "github.com/dgrijalva/jwt-go"
-	"github.com/nandawinata/entry-task/pkg/common/redis"
 	eh "github.com/nandawinata/entry-task/pkg/helper/error_handler"
 	"github.com/nandawinata/entry-task/pkg/helper/middleware/constants"
 )
@@ -55,19 +54,6 @@ func ValidateJwt(req *http.Request) (*TokenPayload, error) {
 
 	newToken := strings.TrimPrefix(tokenRaw, "Bearer ")
 
-	var jwtAuthResult *TokenPayload
-	redisService := redis.New()
-	keyID := fmt.Sprintf(constants.REDIS_KEY, newToken)
-	err := redisService.Get(keyID, &jwtAuthResult)
-
-	if err != nil {
-		return nil, eh.DefaultError(err)
-	}
-
-	if jwtAuthResult != nil {
-		return jwtAuthResult, nil
-	}
-
 	token, err := jwt.Parse(newToken, func(token *jwt.Token) (interface{}, error) {
 		if jwt.GetSigningMethod("HS256") != token.Method {
 			return nil, eh.NewError(http.StatusBadRequest, fmt.Sprintf("Unexpected signing method: %v", token.Header["alg"]))
@@ -90,8 +76,6 @@ func ValidateJwt(req *http.Request) (*TokenPayload, error) {
 			ID:       uint64(id),
 			Username: tokenClaims["username"].(string),
 		}
-
-		redisService.Set(keyID, token, time.Minute)
 
 		return token, nil
 	}
