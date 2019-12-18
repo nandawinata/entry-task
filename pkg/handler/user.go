@@ -67,7 +67,7 @@ func Profile(w http.ResponseWriter, r *http.Request, _ httprouter.Params, token 
 
 	userService := user.New()
 
-	user, err := userService.GetUserById(token.ID)
+	user, err := userService.GetUserById(token.ID, false)
 
 	if err != nil {
 		return nil, eh.DefaultError(err)

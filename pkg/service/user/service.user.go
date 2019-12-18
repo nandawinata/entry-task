@@ -165,22 +165,25 @@ func (s UserService) GetUserByUsername(username string) (*data.User, error) {
 	return user, nil
 }
 
-func (s UserService) GetUserById(id uint64) (*data.User, error) {
+func (s UserService) GetUserById(id uint64, refreshCache bool) (*data.User, error) {
 	var user *data.User
 
 	redisService := redis.New()
 	keyID := fmt.Sprintf(constants.KEY_USER_ID, int(id))
-	err := redisService.Get(keyID, &user)
 
-	if err != nil {
-		return nil, eh.DefaultError(err)
+	if !refreshCache {
+		err := redisService.Get(keyID, &user)
+
+		if err != nil {
+			return nil, eh.DefaultError(err)
+		}
+
+		if user != nil {
+			return user, nil
+		}
 	}
 
-	if user != nil {
-		return user, nil
-	}
-
-	user, err = s.data.GetUserById(id)
+	user, err := s.data.GetUserById(id)
 
 	if err != nil {
 		return nil, eh.DefaultError(err)
@@ -211,7 +214,7 @@ type UpdatePayload struct {
 }
 
 func (s UserService) Update(payload UpdatePayload) error {
-	user, err := s.GetUserById(payload.ID)
+	user, err := s.GetUserById(payload.ID, false)
 
 	if err != nil {
 		return eh.NewError(http.StatusInternalServerError, err.Error())
@@ -246,6 +249,8 @@ func (s UserService) Update(payload UpdatePayload) error {
 			_ = upload_file.DeleteFile(*user.Photo)
 		}
 	}
+
+	s.GetUserById(payload.ID, true)
 
 	return nil
 }
